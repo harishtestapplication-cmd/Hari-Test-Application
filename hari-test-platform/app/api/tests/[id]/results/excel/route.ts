@@ -26,7 +26,7 @@ export async function GET(
     const attempts = await Attempt.find({ testId: id }).sort({ createdAt: -1 });
     const buffer = buildResultsWorkbook(test, attempts);
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
