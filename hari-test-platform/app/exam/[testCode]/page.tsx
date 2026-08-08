@@ -1,12 +1,7 @@
 import { notFound } from "next/navigation";
 import { ExamFlow } from "@/components/exam/ExamFlow";
-
-async function fetchTest(testCode: string) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const res = await fetch(`${appUrl}/api/exams/${testCode}`, { cache: "no-store" });
-  const data = await res.json();
-  return data;
-}
+import { connectDB } from "@/lib/mongodb";
+import { getTestByCode, toStudentSafeTest } from "@/services/testService";
 
 export default async function ExamLandingPage({
   params,
@@ -14,11 +9,13 @@ export default async function ExamLandingPage({
   params: Promise<{ testCode: string }>;
 }) {
   const { testCode } = await params;
-  const data = await fetchTest(testCode);
 
-  if (!data.success) {
+  await connectDB();
+  const test = await getTestByCode(testCode);
+
+  if (!test) {
     notFound();
   }
 
-  return <ExamFlow initialTest={data.test} />;
+  return <ExamFlow initialTest={toStudentSafeTest(test)} />;
 }
